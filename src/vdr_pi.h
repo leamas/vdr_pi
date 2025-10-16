@@ -48,6 +48,7 @@
 #include "vdr_pi_time.h"
 #include "vdr_network.h"
 #include "config.h"
+#include "dm_replay_mgr.h"
 
 #define VDR_TOOL_POSITION -1  // Request default positioning of toolbar tool
 
@@ -70,8 +71,9 @@ enum class VDRDataFormat {
 };
 
 enum class NMEA0183ReplayMode {
-  NETWORK,      // Use network connection
-  INTERNAL_API  // Use PushNMEABuffer()
+  NETWORK,       // Use network connection
+  INTERNAL_API,  // Use PushNMEABuffer()
+  LOOPBACK       // Use WriteCommDriver() on loopback driver
 };
 
 /**
@@ -574,6 +576,8 @@ private:
 
   int m_tb_item_id_record;
   int m_tb_item_id_play;
+
+  DataMonitorReplayMgr m_dm_replay_mgr;
 
   /** Configuration object for saving/loading settings. */
   wxFileConfig* m_pconfig;
