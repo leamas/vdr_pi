@@ -21,6 +21,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
+#include <cstdint>
 
 #include "vdr_pi_prefs_net.h"
 #include "vdr_pi_prefs.h"
