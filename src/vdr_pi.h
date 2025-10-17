@@ -101,10 +101,14 @@ struct VDRProtocolSettings {
   ConnectionSettings n2kNet;       //!< NMEA 2000 connection settings
   ConnectionSettings signalKNet;   //!< Signal K connection settings
 
-  NMEA0183ReplayMode nmea0183ReplayMode =
-      NMEA0183ReplayMode::INTERNAL_API;  //!< NMEA 0183 replay method
+  NMEA0183ReplayMode nmea0183ReplayMode;
 
-  VDRProtocolSettings() : nmea0183(true), nmea2000(false), signalK(false) {}
+  VDRProtocolSettings()
+      : nmea0183(true),
+        nmea2000(false),
+        signalK(false) /**,
+nmea0183ReplayMode(NMEA0183ReplayMode::INTERNAL_API) */
+  {}
 };
 
 /**
