@@ -29,6 +29,12 @@ using namespace std::chrono_literals;
 
 static constexpr auto kEpoch = ReplayTimepoint{};
 
+static const char* const kNoDriverMessage =
+    _(R"(I cannot find any loopback driver and is thus unable
+to replay VDR data. The probable cause is that OpenCPN
+is older than 5.14 -- such versions cannot be used to
+replay VDR data.)");
+
 /** Return true if dh refers to a loopback driver */
 static bool IsLoopbackDriver(DriverHandle dh) {
   auto attr = GetAttributes(dh);
@@ -59,6 +65,7 @@ static void SendString(DriverHandle dh, const std::string& s) {
 class DataMonitorReplayMgr::FilteredByteSource : public io::ByteSourceBase {
 public:
   FilteredByteSource(const std::string& path) : m_stream(path) {}
+  ~FilteredByteSource() override = default;
 
   int read(char* returned, int scount) override {
     assert(scount >= 0);
@@ -106,9 +113,12 @@ DataMonitorReplayMgr::DataMonitorReplayMgr(
   }
   m_loopback_drivers = GetLoopbackDriver();
   m_state = m_loopback_drivers.empty() ? State::kNoDriver : State::kIdle;
+  if (m_state == State::kNoDriver)
+    m_vdr_message(VdrMsgType::kInfo, kNoDriverMessage);
 }
 
-DataMonitorReplayMgr::~DataMonitorReplayMgr() = default;
+// FIXME (leamas)
+DataMonitorReplayMgr::~DataMonitorReplayMgr() { /* delete m_byte_source; */ }
 
 void DataMonitorReplayMgr::HandleSignalK(const std::string& context_self,
                                          const std::string& source,
@@ -132,6 +142,13 @@ void DataMonitorReplayMgr::Handle0183(const std::string& id,
   std::stringstream ss;
   ss << "nmea0183 " << source << " " << id << " " << sentence;
   SendString(m_loopback_drivers[0], ss.str());
+}
+
+void DataMonitorReplayMgr::Start() {
+  if (m_state == State::kIdle) m_read_bytes = 0;
+  if (m_state == State::kPaused || m_state == State::kIdle)
+    m_state = State::kPlaying;
+  Notify();
 }
 
 void DataMonitorReplayMgr::HandleRow(const std::string& protocol,
