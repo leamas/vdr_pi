@@ -119,12 +119,18 @@ private:
     kNoDriver
   } m_state;
 
+  /** Status with respect to the logfile. */
+  struct Log {
+    ReplayTimepoint start_time;   ///< When the replay started
+    ReplayTimepoint first_stamp;  ///< First log line timestamp
+    ReplayTimepoint curr_stamp;   ///< Currently played timestamp
+    const unsigned file_size;
+    unsigned read_bytes;  ///< # read bytes so far
+
+    Log(unsigned _file_size) : file_size(_file_size), read_bytes(0) {}
+  } m_log;
+
   CsvReader m_csv_reader;
-  ReplayTimepoint m_replay_start;       ///< When the replay started
-  ReplayTimepoint m_first_timestamp;    ///< First log line timestamp
-  ReplayTimepoint m_current_timestamp;  ///< Currently played timestamp
-  const unsigned m_file_size;
-  unsigned m_read_bytes;
   std::function<void()> m_update_controls;
   VdrMsgCallback m_vdr_message;
 

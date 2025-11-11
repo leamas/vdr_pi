@@ -95,12 +95,10 @@ DataMonitorReplayMgr::DataMonitorReplayMgr(
     const std::string& path, std::function<void()> update_controls,
     VdrMsgCallback vdr_message)
     : m_state(State::kNotInited),
+      m_log(path.empty() ? 0 : fs::file_size(path)),
       m_csv_reader(path, std::make_unique<FilteredByteSource>(path)),
-      m_file_size(path.empty() ? 0 : fs::file_size(path)),
-      m_read_bytes(0),
       m_update_controls(std::move(update_controls)),
       m_vdr_message(std::move(vdr_message)) {
-
   if (path == "") return;
 
   m_state = State::kError;
@@ -145,13 +143,6 @@ void DataMonitorReplayMgr::Handle0183(const std::string& id,
   SendString(m_loopback_drivers[0], ss.str());
 }
 
-void DataMonitorReplayMgr::Start() {
-  if (m_state == State::kIdle) m_read_bytes = 0;
-  if (m_state == State::kPaused || m_state == State::kIdle)
-    m_state = State::kPlaying;
-  Notify();
-}
-
 void DataMonitorReplayMgr::HandleRow(const std::string& protocol,
                                      const std::string& msg_type,
                                      const std::string& source,
@@ -162,6 +153,13 @@ void DataMonitorReplayMgr::HandleRow(const std::string& protocol,
     Handle0183(msg_type, source, raw_data);
   else if (protocol == "SignalK")
     HandleSignalK(msg_type, source, raw_data);
+}
+
+void DataMonitorReplayMgr::Start() {
+  if (m_state == State::kIdle) m_log.read_bytes = 0;
+  if (m_state == State::kPaused || m_state == State::kIdle)
+    m_state = State::kPlaying;
+  Notify();
 }
 
 int DataMonitorReplayMgr::Notify() {
@@ -179,8 +177,8 @@ int DataMonitorReplayMgr::Notify() {
     m_vdr_message(VdrMsgType::kMessage, err.what());
     return 0;
   }
-  m_read_bytes += received_at.size() + protocol.size() + msg_type.size() +
-                  source.size() + raw_data.size() + 5;
+  m_log.read_bytes += received_at.size() + protocol.size() + msg_type.size() +
+                      source.size() + raw_data.size() + 5;
   HandleRow(protocol, msg_type, source, raw_data);
   if (!there_is_more) {
     m_state = State::kEof;
@@ -197,22 +195,24 @@ std::chrono::milliseconds DataMonitorReplayMgr::ComputeDelay(
   constexpr auto kDefaultDelay = 100ms;
 
   const ReplayTimepoint now = ReplayClock::now();
-  if (m_replay_start == kEpoch) m_replay_start = now;
-  auto duration_from_start =
-      duration_cast<milliseconds>(now - m_replay_start) + kDefaultDelay;
+  if (m_log.start_time == kEpoch) m_log.start_time = now;
   ReplayTimepoint timestamp = kEpoch;
+  milliseconds duration_from_start;
   try {
     timestamp = kEpoch + milliseconds(std::stol(received_at));
-    if (m_first_timestamp == kEpoch) m_first_timestamp = timestamp;
+    if (m_log.first_stamp == kEpoch) m_log.first_stamp = timestamp;
     duration_from_start =
-        duration_cast<milliseconds>(timestamp - m_first_timestamp);
-  } catch (std::invalid_argument&) {
-  } catch (std::out_of_range&) {
+        duration_cast<milliseconds>(timestamp - m_log.first_stamp);
+  } catch (std::logic_error&) {
+    m_vdr_message(VdrMsgType::kDebug,
+                  std::string("Illegal timestamp: ") + received_at);
+    duration_from_start =
+        duration_cast<milliseconds>(now - m_log.start_time) + kDefaultDelay;
   }
-  if (timestamp != kEpoch) m_current_timestamp = timestamp;
+  if (timestamp != kEpoch) m_log.curr_stamp = timestamp;
   if (m_state == State::kIdle) m_state = State::kPlaying;
 
-  const ReplayTimepoint replay_time = m_replay_start + duration_from_start;
+  const ReplayTimepoint replay_time = m_log.start_time + duration_from_start;
   if (replay_time <= now) return 0ms;  // catching up...
   return duration_cast<milliseconds>(replay_time - now);
 }
@@ -220,9 +220,9 @@ std::chrono::milliseconds DataMonitorReplayMgr::ComputeDelay(
 uint64_t DataMonitorReplayMgr::GetCurrentTimestamp() const {
   using namespace std::chrono;
   return static_cast<uint64_t>(
-      duration_cast<milliseconds>(m_current_timestamp - kEpoch).count());
+      duration_cast<milliseconds>(m_log.curr_stamp - kEpoch).count());
 }
 
 double DataMonitorReplayMgr::GetProgressFraction() const {
-  return static_cast<double>(m_read_bytes) / m_file_size;
+  return static_cast<double>(m_log.read_bytes) / m_log.file_size;
 }
