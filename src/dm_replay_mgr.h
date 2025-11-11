@@ -41,7 +41,7 @@ using CsvReader =
 using ReplayClock = std::chrono::system_clock;
 using ReplayTimepoint = std::chrono::time_point<ReplayClock>;
 
-static constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
+constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 
 /** Debug and Message assumed to be logged, Info presented as a GUI dialog. */
 enum class VdrMsgType { kDebug, kMessage, kInfo };
@@ -105,6 +105,9 @@ public:
  . */
   uint64_t GetCurrentTimestamp() const;
 
+  /** Return true if file on path seems to be a Data Monitor VDR logfile */
+  static bool IsVdrFormat(const std::string& path);
+
 private:
   /** CsvReader byte source handling comments and space. */
   class FilteredByteSource;
@@ -153,7 +156,7 @@ private:
    * Compute duration to next message to be sent <br>
    * Side effects: Updates m_replay_start, m_first_timestamp,
    * m_current_timestamp and m_state.
-   * @param ms Current processed logfile entry milliseconds timestamp.
+   * @param ms Current processed logfile entry, milliseconds timestamp.
    * @return Duration to next message.
    */
   std::chrono::milliseconds ComputeDelay(const std::string& ms);
