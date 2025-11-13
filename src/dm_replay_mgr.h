@@ -15,6 +15,12 @@
  *   along with this program; if not, see <https://www.gnu.org/licenses/>. *
  **************************************************************************/
 
+/**
+ * \file
+ *
+ * Data Monitor log files replaying state.
+ */
+
 #ifndef Data_MonitoR_RePlaY_MgR_h
 #define Data_MonitoR_RePlaY_MgR_h
 
@@ -41,17 +47,18 @@ using CsvReader =
 using ReplayClock = std::chrono::system_clock;
 using ReplayTimepoint = std::chrono::time_point<ReplayClock>;
 
-constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
-
 /** Debug and Message assumed to be logged, Info presented as a GUI dialog. */
 enum class VdrMsgType { kDebug, kMessage, kInfo };
 
-/** Handle replaying of data recorded by Data Monitor */
+/**
+ * Handle replaying of data recorded by Data Monitor. A model object, GUI
+ * interaction is handled by callbacks.
+ */
 class DataMonitorReplayMgr {
 public:
   /**
-   * Create instance in idle state playing from a log file.
-   * @param path Log file created by Data Monitor.
+   * Create instance  ready to play a log file.
+   * @param path Log file created by Data Monitor in VDR mode.
    * @param update_controls Callback updating GUI based on current state.
    * @vdr_message Callback handling user info.
    */
@@ -66,7 +73,7 @@ public:
 
   ~DataMonitorReplayMgr();
 
-  /** Start playing file */
+  /** Start or restart playing file */
   void Start();
 
   /** Pause playing */
@@ -100,8 +107,8 @@ public:
   double GetProgressFraction() const;
 
   /**
-   * Return currently played timestamp, milliseconds since 1/1 1970 or
-   * kMaxUint64 if nothing played.
+   * Return currently played timestamp, milliseconds since 1/1 1970.
+   * Undefined if nothing played.
  . */
   uint64_t GetCurrentTimestamp() const;
 
@@ -127,10 +134,10 @@ private:
     ReplayTimepoint start_time;   ///< When the replay started
     ReplayTimepoint first_stamp;  ///< First log line timestamp
     ReplayTimepoint curr_stamp;   ///< Currently played timestamp
+    unsigned read_bytes;          ///< # read bytes so far
     const unsigned file_size;
-    unsigned read_bytes;  ///< # read bytes so far
 
-    Log(unsigned _file_size) : file_size(_file_size), read_bytes(0) {}
+    Log(unsigned _file_size) : read_bytes(0), file_size(_file_size) {}
   } m_log;
 
   CsvReader m_csv_reader;

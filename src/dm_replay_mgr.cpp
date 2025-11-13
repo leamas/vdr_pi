@@ -15,6 +15,12 @@
  *   along with this program; if not, see <https://www.gnu.org/licenses/>. *
  **************************************************************************/
 
+/**
+ * \file
+ *
+ * Implement fm_replay_mgr.h
+ */
+
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -28,6 +34,8 @@
 using namespace std::chrono_literals;
 
 static constexpr auto kEpoch = ReplayTimepoint{};
+
+static constexpr uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 
 static const char* const kNoDriverMessage =
     _(R"(I cannot find any loopback driver and is thus unable
@@ -101,11 +109,11 @@ DataMonitorReplayMgr::DataMonitorReplayMgr(
       m_vdr_message(std::move(vdr_message)) {
   if (path == "") return;
 
-  m_state = State::kError;
   try {
     m_csv_reader.read_header(io::ignore_extra_column, "received_at", "protocol",
                              "msg_type", "source", "raw_data");
   } catch (io::error::base& e) {
+    m_state = State::kError;
     std::string s(_("CSV header parse error: ").ToStdString() + e.what());
     m_vdr_message(VdrMsgType::kInfo, s);
     m_update_controls();
