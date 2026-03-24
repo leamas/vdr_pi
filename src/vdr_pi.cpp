@@ -88,6 +88,15 @@ int VdrPi::Init() {
   m_record_play_mgr->SetControlGui(m_vdr_control);
   m_record_play_mgr->Init();
 
+  DriverHandle found;
+  for (const auto& handle : GetActiveDrivers()) {
+    const auto& attributes = GetAttributes(handle);
+    if (attributes.find("protocol") == attributes.end()) continue;
+    if (attributes.at("protocol") != "internal") continue;
+    found = handle;
+    break;
+  }
+  assert(!found.empty());
   return (WANTS_TOOLBAR_CALLBACK | INSTALLS_TOOLBAR_TOOL | WANTS_CONFIG |
           WANTS_NMEA_SENTENCES | WANTS_AIS_SENTENCES | WANTS_PREFERENCES);
 }
