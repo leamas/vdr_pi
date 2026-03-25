@@ -96,7 +96,13 @@ int VdrPi::Init() {
     found = handle;
     break;
   }
+
   assert(!found.empty());
+  std::string data("[12, 56, 64, 123, 2, 489]");
+  auto payload =
+      std::make_shared<std::vector<uint8_t>>(data.begin(), data.end());
+  CommDriverResult result = WriteCommDriver(found, payload);
+
   return (WANTS_TOOLBAR_CALLBACK | INSTALLS_TOOLBAR_TOOL | WANTS_CONFIG |
           WANTS_NMEA_SENTENCES | WANTS_AIS_SENTENCES | WANTS_PREFERENCES);
 }
