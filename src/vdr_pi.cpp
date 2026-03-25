@@ -46,7 +46,7 @@ extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p) { delete p; }
 //
 //---------------------------------------------------------------------------------------------------------
 
-VdrPi::VdrPi(void* opencpn_plugin) : opencpn_plugin_118(opencpn_plugin) {
+VdrPi::VdrPi(void* opencpn_plugin) : opencpn_plugin_121(opencpn_plugin) {
   // Create the PlugIn icons
   InitializeImages();
 

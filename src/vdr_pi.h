@@ -51,7 +51,7 @@
  *  Main plugin class handles the plugin API implementation and top level
  *  components life cycle.
  */
-class VdrPi : public opencpn_plugin_118 {
+class VdrPi : public opencpn_plugin_121 {
 public:
   /**
    * Constructor

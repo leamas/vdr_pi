@@ -67,7 +67,7 @@ set(SRC
   src/dm_replay_mgr.cpp
 )
 
-set(PKG_API_LIB api-18)  #  A directory in libs/ e. g., api-18 or api-19
+set(PKG_API_LIB api-21)  #  A directory in libs/ e. g., api-18 or api-19
 
 macro(add_plugin_libraries)
   add_subdirectory(${CMAKE_SOURCE_DIR}/libs/fast-cpp-csv-parser)
