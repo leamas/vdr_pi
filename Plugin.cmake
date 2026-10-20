@@ -69,6 +69,16 @@ set(SRC
 
 set(PKG_API_LIB api-21)  #  A directory in libs/ e. g., api-18 or api-19
 
+# Minimum version which should be loaded. Ignored if api < 22.
+# Allows plugins using functions from 1.22+ API to be loaded by
+# hosts only supporting 1.21; plugins then needs to check if host
+# supports 1.22+ before using such functions.
+# If undefined, plugin will only be loaded by host supporting the
+# included api.
+## set(MIN_API_VERSION 1.21)
+
+
+
 macro(add_plugin_libraries)
   add_subdirectory(${CMAKE_SOURCE_DIR}/libs/fast-cpp-csv-parser)
   target_link_libraries(${PACKAGE_NAME} csv-parser::csv-parser)
