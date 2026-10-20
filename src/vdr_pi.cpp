@@ -98,7 +98,7 @@ int VdrPi::Init() {
   }
 
   assert(!found.empty());
-  std::string data("[12, 56, 64, 123, 2, 489]");
+  std::string data("foo [12, 56, 64, 123, 2, 489]");
   auto payload =
       std::make_shared<std::vector<uint8_t>>(data.begin(), data.end());
   CommDriverResult result = WriteCommDriver(found, payload);
