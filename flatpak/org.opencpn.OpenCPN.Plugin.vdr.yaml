@@ -8,7 +8,7 @@ id: org.opencpn.OpenCPN.Plugin.vdr
 runtime: org.opencpn.OpenCPN
 runtime-version: stable
 #runtime-version: devel   # for nightly builds
-sdk: org.freedesktop.Sdk//22.08
+sdk: org.freedesktop.Sdk//24.08
 build-extension: true
 separate-locales: false
 appstream-compose: false
@@ -52,10 +52,10 @@ modules:
 #  # This is a template used to create a complete manifest in the build
 #  # directory. Doing so, it handles three tokens:
 # @@ -20,7 +20,7 @@ id: org.opencpn.OpenCPN.Plugin.@plugin_name
-#  
+#
 #  runtime: org.opencpn.OpenCPN
 #  runtime-version: stable
-# -sdk: org.freedesktop.Sdk//22.08
+# -sdk: org.freedesktop.Sdk//24.08
 # +sdk: org.freedesktop.Sdk//24.08
 #  build-extension: true
 #  separate-locales: false
@@ -81,10 +81,10 @@ modules:
 # +#  # directory. Doing so, it handles three tokens:
 # +# @@ -19,7 +19,7 @@
 # +#  id: org.opencpn.OpenCPN.Plugin.@plugin_name
-# +#  
+# +#
 # +#  runtime: org.opencpn.OpenCPN
 # +# -runtime-version: beta   # FIXME(alec) Revert to stable when updated to 22.08
 # +# +runtime-version: stable
-# +#  sdk: org.freedesktop.Sdk//22.08
+# +#  sdk: org.freedesktop.Sdk//24.08
 # +#  build-extension: true
 # +#  separate-locales: false
